@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <meta charset="UTF-8">
 <title>Car Cost Calculator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -96,7 +97,7 @@ margin:6px 0;
 
 </div>
 
-<canvas id="chart" width="500" height="250"></canvas>
+<canvas id="costChart"></canvas>
 
 </div>
 
@@ -136,25 +137,40 @@ drawChart(electricCostPerKm,petrolCostPerKm)
 
 }
 
-function drawChart(electric,petrol){
+let chart
 
-const canvas=document.getElementById("chart")
-const ctx=canvas.getContext("2d")
+function drawChart(electric, petrol){
 
-ctx.clearRect(0,0,canvas.width,canvas.height)
+const data = {
+labels: ["Electric", "Petrol"],
+datasets: [{
+label: "Cost per km (€)",
+data: [electric, petrol]
+}]
+}
 
-const max=Math.max(electric,petrol)
+if(chart){
+chart.data.datasets[0].data = [electric, petrol]
+chart.update()
+return
+}
 
-const barWidth=120
+const ctx = document.getElementById("costChart")
 
-const eHeight=(electric/max)*180
-const pHeight=(petrol/max)*180
+chart = new Chart(ctx,{
+type: "bar",
+data: data,
+options: {
+responsive: true,
+scales: {
+y: {
+beginAtZero: true
+}
+}
+}
+})
 
-ctx.fillRect(120,200-eHeight,barWidth,eHeight)
-ctx.fillRect(320,200-pHeight,barWidth,pHeight)
-
-ctx.fillText("Electric",140,220)
-ctx.fillText("Petrol",350,220)
+}
 
 }
 
