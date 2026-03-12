@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Car Cost Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Car Cost">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<style>
+body{
+font-family: -apple-system,BlinkMacSystemFont,Arial,sans-serif;
+margin:20px;
+background:#f4f4f4;
+}
+
+.container{
+max-width:600px;
+margin:auto;
+background:white;
+padding:25px;
+border-radius:12px;
+box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+h1{margin-top:0}
+
+label{
+display:block;
+margin-top:15px;
+font-weight:600;
+}
+
+input[type=number]{
+width:100%;
+padding:10px;
+margin-top:5px;
+font-size:16px;
+}
+
+input[type=range]{
+width:100%;
+}
+
+.results{
+margin-top:25px;
+padding:15px;
+background:#eef3ff;
+border-radius:8px;
+}
+
+.result-item{
+margin:6px 0;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Hybrid Cost Calculator</h1>
+
+<label>Battery Size (kWh)</label>
+<input id="battery" type="number" value="12">
+
+<label>Electric Range per Charge (km)</label>
+<input id="range" type="number" value="35">
+
+<label>Electricity Price (€ / kWh)</label>
+<input id="electricity" type="number" step="0.01" value="0.13">
+
+<label>Fuel Price (€ / litre)</label>
+<input id="fuelPrice" type="number" step="0.01" value="1.86">
+
+<label>Fuel Consumption (L / 100km)</label>
+<input id="fuelConsumption" type="number" step="0.1" value="6">
+
+<label>Annual Distance (km)</label>
+<input id="annualDistance" type="number" value="15000">
+
+<div class="results">
+<h2>Results</h2>
+
+<div class="result-item">Charge cost: € <span id="chargeCost"></span></div>
+<div class="result-item">Electric cost/km: € <span id="electricCost"></span></div>
+<div class="result-item">Petrol cost/km: € <span id="petrolCost"></span></div>
+<div class="result-item">Cost to drive electric range on petrol: € <span id="petrolRangeCost"></span></div>
+<div class="result-item">Savings per charge: € <span id="savings"></span></div>
+<div class="result-item">Break‑even electricity price: € <span id="breakeven"></span> /kWh</div>
+<div class="result-item">Estimated yearly savings: € <span id="yearly"></span></div>
+
+</div>
+
+<canvas id="chart" width="500" height="250"></canvas>
+
+</div>
+
+<script>
+
+function calculate(){
+
+const battery=parseFloat(batteryEl.value)||0
+const range=parseFloat(rangeEl.value)||0
+const electricity=parseFloat(electricityEl.value)||0
+const fuelPrice=parseFloat(fuelPriceEl.value)||0
+const fuelConsumption=parseFloat(fuelConsumptionEl.value)||0
+const annualDistance=parseFloat(annualDistanceEl.value)||0
+
+const chargeCost=battery*electricity
+const electricCostPerKm=range?chargeCost/range:0
+
+const petrolCostPer100=fuelConsumption*fuelPrice
+const petrolCostPerKm=petrolCostPer100/100
+
+const petrolRangeCost=petrolCostPerKm*range
+const savings=petrolRangeCost-chargeCost
+
+const breakeven=(petrolCostPerKm*range)/battery
+
+const yearlySavings=(petrolCostPerKm-electricCostPerKm)*annualDistance
+
+chargeCostSpan.textContent=chargeCost.toFixed(2)
+electricCostSpan.textContent=electricCostPerKm.toFixed(3)
+petrolCostSpan.textContent=petrolCostPerKm.toFixed(3)
+petrolRangeCostSpan.textContent=petrolRangeCost.toFixed(2)
+savingsSpan.textContent=savings.toFixed(2)
+breakevenSpan.textContent=breakeven.toFixed(2)
+yearlySpan.textContent=yearlySavings.toFixed(0)
+
+drawChart(electricCostPerKm,petrolCostPerKm)
+
+}
+
+function drawChart(electric,petrol){
+
+const canvas=document.getElementById("chart")
+const ctx=canvas.getContext("2d")
+
+ctx.clearRect(0,0,canvas.width,canvas.height)
+
+const max=Math.max(electric,petrol)
+
+const barWidth=120
+
+const eHeight=(electric/max)*180
+const pHeight=(petrol/max)*180
+
+ctx.fillRect(120,200-eHeight,barWidth,eHeight)
+ctx.fillRect(320,200-pHeight,barWidth,pHeight)
+
+ctx.fillText("Electric",140,220)
+ctx.fillText("Petrol",350,220)
+
+}
+
+const batteryEl=document.getElementById("battery")
+const rangeEl=document.getElementById("range")
+const electricityEl=document.getElementById("electricity")
+const fuelPriceEl=document.getElementById("fuelPrice")
+const fuelConsumptionEl=document.getElementById("fuelConsumption")
+const annualDistanceEl=document.getElementById("annualDistance")
+
+const chargeCostSpan=document.getElementById("chargeCost")
+const electricCostSpan=document.getElementById("electricCost")
+const petrolCostSpan=document.getElementById("petrolCost")
+const petrolRangeCostSpan=document.getElementById("petrolRangeCost")
+const savingsSpan=document.getElementById("savings")
+const breakevenSpan=document.getElementById("breakeven")
+const yearlySpan=document.getElementById("yearly")
+
+document.querySelectorAll("input").forEach(i=>i.addEventListener("input",calculate))
+
+window.onload=calculate
+
+if('serviceWorker' in navigator){
+navigator.serviceWorker.register('sw.js')
+}
+
+</script>
+
+</body>
+</html>
