@@ -1,63 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<meta charset="UTF-8">
-<title>Car Cost Calculator</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="manifest" href="manifest.json">
 
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Car Cost">
-<link rel="apple-touch-icon" href="icon-192.png">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Hybrid Cost Calculator</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+
 body{
-font-family: -apple-system,BlinkMacSystemFont,Arial,sans-serif;
-margin:20px;
-background:#f4f4f4;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
+background:#f5f7fb;
+margin:0;
+padding:20px;
+color:#222;
 }
 
 .container{
-max-width:600px;
+max-width:750px;
 margin:auto;
 background:white;
-padding:25px;
-border-radius:12px;
-box-shadow:0 2px 10px rgba(0,0,0,0.1);
+padding:30px;
+border-radius:14px;
+box-shadow:0 6px 25px rgba(0,0,0,0.08);
 }
 
-h1{margin-top:0}
+h1{
+margin-top:0;
+font-size:28px;
+}
+
+.subtitle{
+color:#666;
+margin-bottom:25px;
+}
 
 label{
-display:block;
-margin-top:15px;
 font-weight:600;
+display:block;
+margin-top:18px;
 }
 
-input[type=number]{
+input{
 width:100%;
 padding:10px;
-margin-top:5px;
+margin-top:6px;
 font-size:16px;
-}
-
-input[type=range]{
-width:100%;
+border-radius:6px;
+border:1px solid #ccc;
 }
 
 .results{
-margin-top:25px;
-padding:15px;
-background:#eef3ff;
-border-radius:8px;
+margin-top:30px;
+background:#f0f4ff;
+padding:18px;
+border-radius:10px;
 }
 
-.result-item{
-margin:6px 0;
+.result{
+display:flex;
+justify-content:space-between;
+padding:6px 0;
+}
+
+.highlight{
+font-weight:700;
+font-size:18px;
+}
+
+canvas{
+margin-top:30px;
+}
+
+.footer{
+margin-top:20px;
+font-size:12px;
+color:#888;
+text-align:center;
 }
 
 </style>
+
 </head>
 
 <body>
@@ -65,6 +91,7 @@ margin:6px 0;
 <div class="container">
 
 <h1>Hybrid Cost Calculator</h1>
+<div class="subtitle">Compare electric vs petrol running costs</div>
 
 <label>Battery Size (kWh)</label>
 <input id="battery" type="number" value="12">
@@ -78,39 +105,71 @@ margin:6px 0;
 <label>Fuel Price (€ / litre)</label>
 <input id="fuelPrice" type="number" step="0.01" value="1.86">
 
-<label>Fuel Consumption (L / 100km)</label>
+<label>Fuel Consumption (L / 100 km)</label>
 <input id="fuelConsumption" type="number" step="0.1" value="6">
 
 <label>Annual Distance (km)</label>
 <input id="annualDistance" type="number" value="15000">
 
 <div class="results">
-<h2>Results</h2>
 
-<div class="result-item">Charge cost: € <span id="chargeCost"></span></div>
-<div class="result-item">Electric cost/km: € <span id="electricCost"></span></div>
-<div class="result-item">Petrol cost/km: € <span id="petrolCost"></span></div>
-<div class="result-item">Cost to drive electric range on petrol: € <span id="petrolRangeCost"></span></div>
-<div class="result-item">Savings per charge: € <span id="savings"></span></div>
-<div class="result-item">Break‑even electricity price: € <span id="breakeven"></span> /kWh</div>
-<div class="result-item">Estimated yearly savings: € <span id="yearly"></span></div>
+<div class="result">
+<span>Charge Cost</span>
+<span>€ <span id="chargeCost"></span></span>
+</div>
+
+<div class="result">
+<span>Electric Cost per km</span>
+<span>€ <span id="electricCost"></span></span>
+</div>
+
+<div class="result">
+<span>Petrol Cost per km</span>
+<span>€ <span id="petrolCost"></span></span>
+</div>
+
+<div class="result">
+<span>Cost of 1 Electric Range on Petrol</span>
+<span>€ <span id="petrolRangeCost"></span></span>
+</div>
+
+<div class="result highlight">
+<span>Savings per Charge</span>
+<span>€ <span id="savings"></span></span>
+</div>
+
+<div class="result">
+<span>Break-even Electricity Price</span>
+<span>€ <span id="breakeven"></span> /kWh</span>
+</div>
+
+<div class="result highlight">
+<span>Estimated Yearly Savings</span>
+<span>€ <span id="yearly"></span></span>
+</div>
 
 </div>
 
 <canvas id="costChart"></canvas>
 
+<div class="footer">
+Hybrid Cost Calculator
+</div>
+
 </div>
 
 <script>
 
+let chart
+
 function calculate(){
 
-const battery=parseFloat(batteryEl.value)||0
-const range=parseFloat(rangeEl.value)||0
-const electricity=parseFloat(electricityEl.value)||0
-const fuelPrice=parseFloat(fuelPriceEl.value)||0
-const fuelConsumption=parseFloat(fuelConsumptionEl.value)||0
-const annualDistance=parseFloat(annualDistanceEl.value)||0
+const battery=parseFloat(document.getElementById("battery").value)||0
+const range=parseFloat(document.getElementById("range").value)||0
+const electricity=parseFloat(document.getElementById("electricity").value)||0
+const fuelPrice=parseFloat(document.getElementById("fuelPrice").value)||0
+const fuelConsumption=parseFloat(document.getElementById("fuelConsumption").value)||0
+const annualDistance=parseFloat(document.getElementById("annualDistance").value)||0
 
 const chargeCost=battery*electricity
 const electricCostPerKm=range?chargeCost/range:0
@@ -125,46 +184,52 @@ const breakeven=(petrolCostPerKm*range)/battery
 
 const yearlySavings=(petrolCostPerKm-electricCostPerKm)*annualDistance
 
-chargeCostSpan.textContent=chargeCost.toFixed(2)
-electricCostSpan.textContent=electricCostPerKm.toFixed(3)
-petrolCostSpan.textContent=petrolCostPerKm.toFixed(3)
-petrolRangeCostSpan.textContent=petrolRangeCost.toFixed(2)
-savingsSpan.textContent=savings.toFixed(2)
-breakevenSpan.textContent=breakeven.toFixed(2)
-yearlySpan.textContent=yearlySavings.toFixed(0)
+document.getElementById("chargeCost").textContent=chargeCost.toFixed(2)
+document.getElementById("electricCost").textContent=electricCostPerKm.toFixed(3)
+document.getElementById("petrolCost").textContent=petrolCostPerKm.toFixed(3)
+document.getElementById("petrolRangeCost").textContent=petrolRangeCost.toFixed(2)
+document.getElementById("savings").textContent=savings.toFixed(2)
+document.getElementById("breakeven").textContent=breakeven.toFixed(2)
+document.getElementById("yearly").textContent=yearlySavings.toFixed(0)
 
 drawChart(electricCostPerKm,petrolCostPerKm)
 
 }
 
-let chart
+function drawChart(electric,petrol){
 
-function drawChart(electric, petrol){
-
-const data = {
-labels: ["Electric", "Petrol"],
-datasets: [{
-label: "Cost per km (€)",
-data: [electric, petrol]
+const data={
+labels:["Electric","Petrol"],
+datasets:[{
+label:"Cost per km (€)",
+data:[electric,petrol],
+backgroundColor:["#2ecc71","#e74c3c"]
 }]
 }
 
 if(chart){
-chart.data.datasets[0].data = [electric, petrol]
+chart.data.datasets[0].data=[electric,petrol]
 chart.update()
 return
 }
 
-const ctx = document.getElementById("costChart")
+const ctx=document.getElementById("costChart")
 
-chart = new Chart(ctx,{
-type: "bar",
-data: data,
-options: {
-responsive: true,
-scales: {
-y: {
-beginAtZero: true
+chart=new Chart(ctx,{
+type:"bar",
+data:data,
+options:{
+responsive:true,
+plugins:{
+legend:{display:false}
+},
+scales:{
+y:{
+beginAtZero:true,
+title:{
+display:true,
+text:"Cost (€ / km)"
+}
 }
 }
 }
@@ -172,30 +237,11 @@ beginAtZero: true
 
 }
 
-}
-
-const batteryEl=document.getElementById("battery")
-const rangeEl=document.getElementById("range")
-const electricityEl=document.getElementById("electricity")
-const fuelPriceEl=document.getElementById("fuelPrice")
-const fuelConsumptionEl=document.getElementById("fuelConsumption")
-const annualDistanceEl=document.getElementById("annualDistance")
-
-const chargeCostSpan=document.getElementById("chargeCost")
-const electricCostSpan=document.getElementById("electricCost")
-const petrolCostSpan=document.getElementById("petrolCost")
-const petrolRangeCostSpan=document.getElementById("petrolRangeCost")
-const savingsSpan=document.getElementById("savings")
-const breakevenSpan=document.getElementById("breakeven")
-const yearlySpan=document.getElementById("yearly")
-
-document.querySelectorAll("input").forEach(i=>i.addEventListener("input",calculate))
+document.querySelectorAll("input").forEach(input=>{
+input.addEventListener("input",calculate)
+})
 
 window.onload=calculate
-
-if('serviceWorker' in navigator){
-navigator.serviceWorker.register('sw.js')
-}
 
 </script>
 
