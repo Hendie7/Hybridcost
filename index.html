@@ -132,35 +132,29 @@ savingsSpan.textContent=savings.toFixed(2)
 breakevenSpan.textContent=breakeven.toFixed(2)
 yearlySpan.textContent=yearlySavings.toFixed(0)
 
-function drawChart(electric, petrol){
+drawChart(electricCostPerKm,petrolCostPerKm)
 
-const canvas = document.getElementById("chart")
-const ctx = canvas.getContext("2d")
+}
+
+function drawChart(electric,petrol){
+
+const canvas=document.getElementById("chart")
+const ctx=canvas.getContext("2d")
 
 ctx.clearRect(0,0,canvas.width,canvas.height)
 
-// prevent divide by zero
-const maxValue = Math.max(electric, petrol, 0.0001)
+const max=Math.max(electric,petrol)
 
-const chartHeight = 180
-const barWidth = 100
+const barWidth=120
 
-const electricHeight = (electric / maxValue) * chartHeight
-const petrolHeight = (petrol / maxValue) * chartHeight
+const eHeight=(electric/max)*180
+const pHeight=(petrol/max)*180
 
-// electric bar
-ctx.fillStyle = "#2ecc71"
-ctx.fillRect(130,200-electricHeight,barWidth,electricHeight)
+ctx.fillRect(120,200-eHeight,barWidth,eHeight)
+ctx.fillRect(320,200-pHeight,barWidth,pHeight)
 
-// petrol bar
-ctx.fillStyle = "#e74c3c"
-ctx.fillRect(300,200-petrolHeight,barWidth,petrolHeight)
-
-// labels
-ctx.fillStyle = "#000"
-ctx.font = "14px Arial"
-ctx.fillText("Electric",150,220)
-ctx.fillText("Petrol",325,220)
+ctx.fillText("Electric",140,220)
+ctx.fillText("Petrol",350,220)
 
 }
 
