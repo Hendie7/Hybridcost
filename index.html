@@ -132,7 +132,6 @@ savingsSpan.textContent=savings.toFixed(2)
 breakevenSpan.textContent=breakeven.toFixed(2)
 yearlySpan.textContent=yearlySavings.toFixed(0)
 
-<script>
 function drawChart(electric, petrol){
 
 const canvas = document.getElementById("chart")
@@ -140,31 +139,30 @@ const ctx = canvas.getContext("2d")
 
 ctx.clearRect(0,0,canvas.width,canvas.height)
 
-// chart settings
-const maxValue = Math.max(electric, petrol)
-const chartHeight = 180
-const barWidth = 120
+// prevent divide by zero
+const maxValue = Math.max(electric, petrol, 0.0001)
 
-// calculate bar heights
+const chartHeight = 180
+const barWidth = 100
+
 const electricHeight = (electric / maxValue) * chartHeight
 const petrolHeight = (petrol / maxValue) * chartHeight
 
-// draw electric bar
-ctx.fillStyle = "#4CAF50"
-ctx.fillRect(120,200-electricHeight,barWidth,electricHeight)
+// electric bar
+ctx.fillStyle = "#2ecc71"
+ctx.fillRect(130,200-electricHeight,barWidth,electricHeight)
 
-// draw petrol bar
-ctx.fillStyle = "#f44336"
-ctx.fillRect(320,200-petrolHeight,barWidth,petrolHeight)
+// petrol bar
+ctx.fillStyle = "#e74c3c"
+ctx.fillRect(300,200-petrolHeight,barWidth,petrolHeight)
 
 // labels
 ctx.fillStyle = "#000"
 ctx.font = "14px Arial"
 ctx.fillText("Electric",150,220)
-ctx.fillText("Petrol",360,220)
+ctx.fillText("Petrol",325,220)
 
 }
-</script>
 
 const batteryEl=document.getElementById("battery")
 const rangeEl=document.getElementById("range")
