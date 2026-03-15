@@ -70,8 +70,14 @@ width:100%;
 .results{
 margin-top:30px;
 padding:18px;
-background:#eef2ff;
 border-radius:10px;
+background:#eef2ff;
+color:#1f2937;
+}
+
+body.dark .results{
+background:#374151;
+color:#f3f4f6;
 }
 
 .result{
@@ -102,6 +108,18 @@ cursor:pointer;
 
 canvas{
 margin-top:35px;
+}
+
+body.dark canvas{
+background:#1f2937;
+border-radius:10px;
+padding:10px;
+}
+
+body.dark input{
+background:#374151;
+color:white;
+border:1px solid #555;
 }
 
 @media(max-width:700px){
