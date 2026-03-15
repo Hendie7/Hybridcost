@@ -199,6 +199,12 @@ grid-template-columns:1fr;
 
 <canvas id="chart"></canvas>
 
+<h3>Cost vs Distance</h3>
+<canvas id="distanceChart"></canvas>
+
+<h3>Electricity Price Sensitivity</h3>
+<canvas id="priceChart"></canvas>
+
 </div>
 
 <script>
@@ -210,6 +216,8 @@ document.body.classList.add("dark")
 }
 
 let chart
+let distanceChart
+let priceChart
 
 function calculate(){
 
@@ -252,6 +260,111 @@ if(chart){
 chart.data.datasets[0].data=[electric,petrol]
 chart.update()
 return
+
+}
+
+function drawExtraCharts(electricCost, petrolCost){
+
+const distancePoints=[0,5000,10000,20000,30000,40000]
+
+const electricTotals=distancePoints.map(d=>d*electricCost)
+const petrolTotals=distancePoints.map(d=>d*petrolCost)
+
+if(distanceChart){
+
+distanceChart.data.datasets[0].data=electricTotals
+distanceChart.data.datasets[1].data=petrolTotals
+distanceChart.update()
+
+}else{
+
+distanceChart=new Chart(document.getElementById("distanceChart"),{
+
+type:"line",
+
+data:{
+labels:distancePoints,
+datasets:[
+{
+label:"Electric Cost",
+data:electricTotals,
+borderColor:"#22c55e",
+fill:false
+},
+{
+label:"Petrol Cost",
+data:petrolTotals,
+borderColor:"#ef4444",
+fill:false
+}
+]
+},
+
+options:{
+responsive:true,
+plugins:{legend:{display:true}},
+scales:{
+x:{title:{display:true,text:"Distance (km)"}},
+y:{title:{display:true,text:"Total Cost (€)"}}
+}
+
+}
+
+})
+
+}
+
+const priceRange=[0.05,0.10,0.15,0.20,0.25,0.30,0.40,0.50]
+
+const electricCosts=priceRange.map(p=>{
+return (batteryInput.value*p)/rangeInput.value
+})
+
+const petrolLine=priceRange.map(()=>petrolCost)
+
+if(priceChart){
+
+priceChart.data.datasets[0].data=electricCosts
+priceChart.data.datasets[1].data=petrolLine
+priceChart.update()
+
+}else{
+
+priceChart=new Chart(document.getElementById("priceChart"),{
+
+type:"line",
+
+data:{
+labels:priceRange,
+datasets:[
+{
+label:"Electric Cost/km",
+data:electricCosts,
+borderColor:"#22c55e",
+fill:false
+},
+{
+label:"Petrol Cost/km",
+data:petrolLine,
+borderColor:"#ef4444",
+fill:false
+}
+]
+},
+
+options:{
+responsive:true,
+plugins:{legend:{display:true}},
+scales:{
+x:{title:{display:true,text:"Electricity Price €/kWh"}},
+y:{title:{display:true,text:"Cost €/km"}}
+}
+
+}
+
+})
+
+}
 
 }
 
