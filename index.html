@@ -263,7 +263,7 @@ return
 
 }
 
-function drawExtraCharts(electricCost, petrolCost){
+function drawExtraCharts(electricCostPerKm, petrolCostPerKm){
 
 const distancePoints=[0,5000,10000,20000,30000,40000]
 
@@ -317,7 +317,7 @@ y:{title:{display:true,text:"Total Cost (€)"}}
 const priceRange=[0.05,0.10,0.15,0.20,0.25,0.30,0.40,0.50]
 
 const electricCosts=priceRange.map(p=>{
-return (batteryInput.value*p)/rangeInput.value
+return (battery.value * p) / rangeEl.value
 })
 
 const petrolLine=priceRange.map(()=>petrolCost)
