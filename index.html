@@ -3,7 +3,7 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
 <title>Hybrid Cost Calculator</title>
 
@@ -11,52 +11,66 @@
 
 <style>
 
+:root{
+--bg:#f5f7fb;
+--card:#ffffff;
+--text:#1f2937;
+--accent:#2563eb;
+}
+
+body.dark{
+--bg:#111827;
+--card:#1f2937;
+--text:#f3f4f6;
+}
+
 body{
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial;
-background:#f5f7fb;
+background:var(--bg);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
 margin:0;
-padding:20px;
-color:#222;
+padding:25px;
+color:var(--text);
 }
 
 .container{
-max-width:750px;
+max-width:900px;
 margin:auto;
-background:white;
+background:var(--card);
 padding:30px;
 border-radius:14px;
-box-shadow:0 6px 25px rgba(0,0,0,0.08);
+box-shadow:0 10px 35px rgba(0,0,0,0.15);
 }
 
 h1{
 margin-top:0;
-font-size:28px;
 }
 
-.subtitle{
-color:#666;
-margin-bottom:25px;
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:25px;
 }
 
 label{
 font-weight:600;
 display:block;
-margin-top:18px;
+margin-top:12px;
 }
 
-input{
+input[type=number]{
 width:100%;
-padding:10px;
-margin-top:6px;
-font-size:16px;
-border-radius:6px;
-border:1px solid #ccc;
+padding:8px;
+margin-top:5px;
+}
+
+input[type=range]{
+width:100%;
 }
 
 .results{
 margin-top:30px;
-background:#f0f4ff;
 padding:18px;
+background:#eef2ff;
 border-radius:10px;
 }
 
@@ -71,15 +85,29 @@ font-weight:700;
 font-size:18px;
 }
 
-canvas{
-margin-top:30px;
+.buttons{
+margin-top:20px;
+display:flex;
+gap:10px;
 }
 
-.footer{
-margin-top:20px;
-font-size:12px;
-color:#888;
-text-align:center;
+button{
+padding:10px 14px;
+border:none;
+border-radius:6px;
+background:var(--accent);
+color:white;
+cursor:pointer;
+}
+
+canvas{
+margin-top:35px;
+}
+
+@media(max-width:700px){
+.grid{
+grid-template-columns:1fr;
+}
 }
 
 </style>
@@ -91,70 +119,67 @@ text-align:center;
 <div class="container">
 
 <h1>Hybrid Cost Calculator</h1>
-<div class="subtitle">Compare electric vs petrol running costs</div>
+
+<div class="buttons">
+<button onclick="toggleDark()">Toggle Dark Mode</button>
+<button onclick="shareLink()">Share Calculation</button>
+</div>
+
+<div class="grid">
+
+<div>
 
 <label>Battery Size (kWh)</label>
 <input id="battery" type="number" value="12">
+<input id="batterySlider" type="range" min="5" max="30" value="12">
 
-<label>Electric Range per Charge (km)</label>
+<label>Electric Range (km)</label>
 <input id="range" type="number" value="35">
+<input id="rangeSlider" type="range" min="10" max="120" value="35">
 
 <label>Electricity Price (€ / kWh)</label>
 <input id="electricity" type="number" step="0.01" value="0.13">
+<input id="electricitySlider" type="range" min="0.05" max="0.60" step="0.01" value="0.13">
+
+</div>
+
+<div>
 
 <label>Fuel Price (€ / litre)</label>
 <input id="fuelPrice" type="number" step="0.01" value="1.86">
+<input id="fuelSlider" type="range" min="1" max="3" step="0.01" value="1.86">
 
-<label>Fuel Consumption (L / 100 km)</label>
-<input id="fuelConsumption" type="number" step="0.1" value="5.6">
+<label>Fuel Consumption (L / 100km)</label>
+<input id="fuelConsumption" type="number" value="6">
+<input id="consumptionSlider" type="range" min="3" max="15" step="0.1" value="6">
 
 <label>Annual Distance (km)</label>
 <input id="annualDistance" type="number" value="15000">
+<input id="distanceSlider" type="range" min="5000" max="50000" step="1000" value="15000">
+
+</div>
+
+</div>
 
 <div class="results">
 
-<div class="result">
-<span>Charge Cost</span>
-<span>€ <span id="chargeCost"></span></span>
-</div>
+<div class="result"><span>Charge Cost</span><span>€ <span id="chargeCost"></span></span></div>
 
-<div class="result">
-<span>Electric Cost per km</span>
-<span>€ <span id="electricCost"></span></span>
-</div>
+<div class="result"><span>Electric €/km</span><span>€ <span id="electricCost"></span></span></div>
 
-<div class="result">
-<span>Petrol Cost per km</span>
-<span>€ <span id="petrolCost"></span></span>
-</div>
+<div class="result"><span>Petrol €/km</span><span>€ <span id="petrolCost"></span></span></div>
 
-<div class="result">
-<span>Cost of 1 Electric Range on Petrol</span>
-<span>€ <span id="petrolRangeCost"></span></span>
-</div>
+<div class="result highlight"><span>Savings per Charge</span><span>€ <span id="savings"></span></span></div>
 
-<div class="result highlight">
-<span>Savings per Charge</span>
-<span>€ <span id="savings"></span></span>
-</div>
+<div class="result"><span>Break-even Electricity Price</span><span>€ <span id="breakeven"></span> /kWh</span></div>
 
-<div class="result">
-<span>Break-even Electricity Price</span>
-<span>€ <span id="breakeven"></span> /kWh</span>
-</div>
+<div class="result highlight"><span>Yearly Savings</span><span>€ <span id="yearly"></span></span></div>
 
-<div class="result highlight">
-<span>Estimated Yearly Savings</span>
-<span>€ <span id="yearly"></span></span>
-</div>
+<div class="result highlight"><span>5-Year Savings</span><span>€ <span id="fiveyear"></span></span></div>
 
 </div>
 
-<canvas id="costChart"></canvas>
-
-<div class="footer">
-Hybrid Cost Calculator
-</div>
+<canvas id="chart"></canvas>
 
 </div>
 
@@ -164,84 +189,148 @@ let chart
 
 function calculate(){
 
-const battery=parseFloat(document.getElementById("battery").value)||0
-const range=parseFloat(document.getElementById("range").value)||0
-const electricity=parseFloat(document.getElementById("electricity").value)||0
-const fuelPrice=parseFloat(document.getElementById("fuelPrice").value)||0
-const fuelConsumption=parseFloat(document.getElementById("fuelConsumption").value)||0
-const annualDistance=parseFloat(document.getElementById("annualDistance").value)||0
+const battery=parseFloat(batteryInput.value)
+const range=parseFloat(rangeInput.value)
+const electricity=parseFloat(electricityInput.value)
+const fuelPrice=parseFloat(fuelInput.value)
+const consumption=parseFloat(consumptionInput.value)
+const annual=parseFloat(distanceInput.value)
 
 const chargeCost=battery*electricity
-const electricCostPerKm=range?chargeCost/range:0
+const electricCost=chargeCost/range
 
-const petrolCostPer100=fuelConsumption*fuelPrice
-const petrolCostPerKm=petrolCostPer100/100
+const petrolCost=(consumption*fuelPrice)/100
 
-const petrolRangeCost=petrolCostPerKm*range
+const petrolRangeCost=petrolCost*range
 const savings=petrolRangeCost-chargeCost
 
-const breakeven=(petrolCostPerKm*range)/battery
+const breakeven=(petrolCost*range)/battery
 
-const yearlySavings=(petrolCostPerKm-electricCostPerKm)*annualDistance
+const yearly=(petrolCost-electricCost)*annual
+const fiveyear=yearly*5
 
-document.getElementById("chargeCost").textContent=chargeCost.toFixed(2)
-document.getElementById("electricCost").textContent=electricCostPerKm.toFixed(3)
-document.getElementById("petrolCost").textContent=petrolCostPerKm.toFixed(3)
-document.getElementById("petrolRangeCost").textContent=petrolRangeCost.toFixed(2)
-document.getElementById("savings").textContent=savings.toFixed(2)
-document.getElementById("breakeven").textContent=breakeven.toFixed(2)
-document.getElementById("yearly").textContent=yearlySavings.toFixed(0)
+chargeCostEl.textContent=chargeCost.toFixed(2)
+electricCostEl.textContent=electricCost.toFixed(3)
+petrolCostEl.textContent=petrolCost.toFixed(3)
+savingsEl.textContent=savings.toFixed(2)
+breakevenEl.textContent=breakeven.toFixed(2)
+yearlyEl.textContent=yearly.toFixed(0)
+fiveyearEl.textContent=fiveyear.toFixed(0)
 
-drawChart(electricCostPerKm,petrolCostPerKm)
+drawChart(electricCost,petrolCost)
 
 }
 
 function drawChart(electric,petrol){
 
-const data={
-labels:["Electric","Petrol"],
-datasets:[{
-label:"Cost per km (€)",
-data:[electric,petrol],
-backgroundColor:["#2ecc71","#e74c3c"]
-}]
-}
-
 if(chart){
+
 chart.data.datasets[0].data=[electric,petrol]
 chart.update()
 return
+
 }
 
-const ctx=document.getElementById("costChart")
+chart=new Chart(document.getElementById("chart"),{
 
-chart=new Chart(ctx,{
 type:"bar",
-data:data,
-options:{
-responsive:true,
-plugins:{
-legend:{display:false}
+
+data:{
+labels:["Electric €/km","Petrol €/km"],
+datasets:[{
+data:[electric,petrol],
+backgroundColor:["#22c55e","#ef4444"]
+}]
 },
-scales:{
-y:{
-beginAtZero:true,
-title:{
-display:true,
-text:"Cost (€ / km)"
+
+options:{
+plugins:{legend:{display:false}},
+responsive:true
 }
-}
-}
-}
+
 })
 
 }
 
-document.querySelectorAll("input").forEach(input=>{
-input.addEventListener("input",calculate)
+function toggleDark(){
+document.body.classList.toggle("dark")
+}
+
+function shareLink(){
+
+const params=new URLSearchParams({
+
+battery:batteryInput.value,
+range:rangeInput.value,
+electricity:electricityInput.value,
+fuel:fuelInput.value,
+consumption:consumptionInput.value,
+distance:distanceInput.value
+
 })
 
-window.onload=calculate
+const url=location.origin+location.pathname+"?"+params
+
+navigator.clipboard.writeText(url)
+
+alert("Shareable link copied")
+
+}
+
+function loadFromURL(){
+
+const params=new URLSearchParams(window.location.search)
+
+if(!params.has("battery")) return
+
+batteryInput.value=params.get("battery")
+rangeInput.value=params.get("range")
+electricityInput.value=params.get("electricity")
+fuelInput.value=params.get("fuel")
+consumptionInput.value=params.get("consumption")
+distanceInput.value=params.get("distance")
+
+}
+
+function sync(input,slider){
+
+input.addEventListener("input",()=>{
+slider.value=input.value
+calculate()
+})
+
+slider.addEventListener("input",()=>{
+input.value=slider.value
+calculate()
+})
+
+}
+
+const batteryInput=document.getElementById("battery")
+const rangeInput=document.getElementById("range")
+const electricityInput=document.getElementById("electricity")
+const fuelInput=document.getElementById("fuelPrice")
+const consumptionInput=document.getElementById("fuelConsumption")
+const distanceInput=document.getElementById("annualDistance")
+
+const chargeCostEl=document.getElementById("chargeCost")
+const electricCostEl=document.getElementById("electricCost")
+const petrolCostEl=document.getElementById("petrolCost")
+const savingsEl=document.getElementById("savings")
+const breakevenEl=document.getElementById("breakeven")
+const yearlyEl=document.getElementById("yearly")
+const fiveyearEl=document.getElementById("fiveyear")
+
+sync(batteryInput,batterySlider)
+sync(rangeInput,rangeSlider)
+sync(electricityInput,electricitySlider)
+sync(fuelInput,fuelSlider)
+sync(consumptionInput,consumptionSlider)
+sync(distanceInput,distanceSlider)
+
+loadFromURL()
+
+calculate()
 
 </script>
 
